@@ -3,6 +3,8 @@ package entities
 import (
 	"encoding/json"
 	"errors"
+	"github.com/lucasepe/codename"
+	"github.com/segmentio/ksuid"
 	"io"
 	"net"
 	"time"
@@ -128,9 +130,9 @@ func(lc *Project) FindNodeByName(name string) (*Node){
 	return nil
 }
 
-func(lc *Project) FindClusterMasterNode(clusterName string) (*Node){
+func(lc *Project) FindMasterNode() (*Node){
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].ClusterName == clusterName && lc.Nodes[mi].IsMaster){
+		if(lc.Nodes[mi].IsMaster){
 			return &lc.Nodes[mi]
 		}
 	}
@@ -301,3 +303,44 @@ func(ps Projects) ReserveOne() (Projects, *Project, error){
 	return ps, nil, errors.New(ErrorNoReservableProjects)
 }
 
+
+func NodeName() string{
+	rng, err := codename.DefaultRNG()
+	if err != nil {
+		return ""
+	}
+	return codename.Generate(rng, 4)
+
+}
+
+func (cfg *Project) AddNode() (*Project, *Node, error){
+
+	thisIsMaster := true
+
+	master := cfg.FindMasterNode()
+
+	var masterIp net.IP
+	var nodeToken string
+	if(master != nil){
+		thisIsMaster = false
+		masterIp  = master.IPV4
+		nodeToken = master.NodeToken
+	}
+
+	newNode := Node{
+		ID:       ksuid.New().String(),
+		Name:     NodeName(),
+		IsMaster: thisIsMaster,
+		MasterIP: masterIp,
+		NodeToken: nodeToken,
+		Status:   "NEW",
+		Created:  time.Now(),
+		Updated:  time.Now(),
+		Deleted:  nil,
+		Features: NodeFeatures{},
+	}
+
+	cfg.Nodes = append(cfg.Nodes, newNode)
+
+	return cfg, &newNode, nil
+}

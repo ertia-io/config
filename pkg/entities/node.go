@@ -22,7 +22,6 @@ const (
 
 type Node struct {
 	ID          string           `json:"id"`
-	ClusterName string           `json:"clusterName"`
 	ProviderID  string           `json:"providerId"`
 	NodeToken  string           `json:"nodeToken"`
 	IsMaster    bool             `json:"isMaster"`

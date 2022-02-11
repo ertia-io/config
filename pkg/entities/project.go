@@ -12,15 +12,17 @@ const DefaultProvider = "GLESYS"
 const ErrorNoReservableProjects = "Could not find any available projects to reserve"
 
 type Project struct {
-	ProjectID string          `json:"project"`
+	ID string `json:"id"`
+	Provider string           `json:"provider"`
+	ProviderID string `json:"providerID"` // Provider Project ID
+	ProviderToken string `json:"providerToken"`
 	Name string 				`json:"name"`
-	APIToken string           `json:"apiToken"`
 	SSHKey *SSHKey `json:"sshKey"`
 	Nodes []Node              `json:"nodes"`
 	Created time.Time         `json:"created"`
 	Updated time.Time         `json:"updated"`
 	Context string            `json:"context"`
-	Provider string           `json:"provider"`
+
 	Reserved bool 			`json:"reserved"`
 	Domain string `json:"domain"`
 	Tags []string `json:"tags"`
@@ -34,15 +36,21 @@ func(cfg *Project) WithProvider(provider string) *Project{
 	return cfg
 }
 
+func(cfg *Project) WithProviderID(providerProjectId string) *Project{
+	cfg.ProviderID = providerProjectId
+	return cfg
+}
+
+func(cfg *Project) WithProviderToken(token string) *Project{
+	cfg.ProviderToken = token
+	return cfg
+}
+
 func(cfg *Project) WithName(name string) *Project{
 	cfg.Name = name
 	return cfg
 }
 
-func(cfg *Project) WithAPIToken(apiToken string) *Project{
-	cfg.APIToken = apiToken
-	return cfg
-}
 
 
 func(lc *Project) ToJSON() ([]byte, error) {
@@ -207,9 +215,34 @@ func removeNode(s []Node, i int) []Node {
 
 type ProjectOption func(config *Project) *Project
 
-func WithID(projectId string) ProjectOption {
+func WithID(id string) ProjectOption {
 	return func(cfg *Project) *Project{
-		cfg.ProjectID = projectId
+		cfg.ID = id
+		return cfg
+	}
+}
+
+
+
+func WithProvider(provider string) ProjectOption {
+	return func(cfg *Project) *Project{
+		cfg.Provider = provider
+		return cfg
+	}
+}
+
+
+func WithProviderID(projectProviderId string) ProjectOption {
+	return func(cfg *Project) *Project{
+		cfg.ProviderID = projectProviderId
+		return cfg
+	}
+}
+
+
+func WithProviderToken(token string) ProjectOption {
+	return func(cfg *Project) *Project{
+		cfg.ProviderToken = token
 		return cfg
 	}
 }
@@ -229,14 +262,6 @@ func WithDomain(domain string) ProjectOption {
 	}
 }
 
-
-
-func WithProviderToken(token string) ProjectOption {
-	return func(cfg *Project) *Project{
-		cfg.APIToken = token
-		return cfg
-	}
-}
 
 func NewProject(opts ...ProjectOption) (*Project, error){
 

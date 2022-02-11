@@ -27,26 +27,26 @@ type Node struct {
 	NodeToken  string           `json:"nodeToken"`
 	IsMaster    bool             `json:"isMaster"`
 	MasterIP    net.IP			 `json:"masterIP"`
-	Tags        []string         `json:"tags"`
-	Name        string           `json:"name"`
-	IPV4        net.IP           `json:"ipv4"`
-	IPV6        net.IP           `json:"ipv6"`
-	Status      string           `json:"status"`
-	Retries     int              `json:"retries"`
-	Error	    string          `json:"error"`
-	Created     time.Time        `json:"created"`
-	Updated     time.Time        `json:"updated"`
-	Deleted     *time.Time       `json:"deleted"`
-	Features    LubeNodeFeatures `json:"features"`
-	Dependencies []Dependency    `json:"dependencies"`
-	Deployments []Deployment     `json:"deployments"`
+	Tags            []string     `json:"tags"`
+	Name            string       `json:"name"`
+	IPV4            net.IP       `json:"ipv4"`
+	IPV6            net.IP       `json:"ipv6"`
+	Status          string       `json:"status"`
+	Retries         int          `json:"retries"`
+	Error           string       `json:"error"`
+	Created         time.Time    `json:"created"`
+	Updated         time.Time    `json:"updated"`
+	Deleted         *time.Time   `json:"deleted"`
+	Features        NodeFeatures `json:"features"`
+	Dependencies    []Dependency `json:"dependencies"`
+	Deployments     []Deployment `json:"deployments"`
 	InstallPassword string       `json:"installPassword"`
-	InstallUser string           `json:"installUser"`
+	InstallUser     string       `json:"installUser"`
 	//TODO: Add data as needed
 }
 
 
-type LubeNodeFeatures map[string] bool
+type NodeFeatures map[string] bool
 
 func(ma *Node) NeedsAdapting() bool{
 	return ma.Status == NodeStatusNew || ma.Status == NodeStatusActive || ma.Status == NodeStatusRetrying

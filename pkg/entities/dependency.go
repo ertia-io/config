@@ -9,7 +9,7 @@ const (
 	DependencyStatusWaiting = "WAITING"
 )
 
-type LubeDependency struct {
+type Dependency struct {
 	Name string `json:"name"`
 	Status string `json:"status"`
 	Retries int32 `json:"retries"`

@@ -20,7 +20,7 @@ const (
 	NodeStatusDeleted    = "DELETED"
 )
 
-type LubeNode struct {
+type Node struct {
 	ID          string           `json:"id"`
 	ClusterName string           `json:"clusterName"`
 	ProviderID  string           `json:"providerId"`
@@ -33,65 +33,36 @@ type LubeNode struct {
 	IPV6        net.IP           `json:"ipv6"`
 	Status      string           `json:"status"`
 	Retries     int              `json:"retries"`
-	Error	    string				`json:"error"`
+	Error	    string          `json:"error"`
 	Created     time.Time        `json:"created"`
 	Updated     time.Time        `json:"updated"`
 	Deleted     *time.Time       `json:"deleted"`
 	Features    LubeNodeFeatures `json:"features"`
-	Dependencies []LubeDependency `json:"dependencies"`
-	Deployments []LubeDeployment `json:"deployments"`
-	InstallPassword string `json:"installPassword"`
-	InstallUser string `json:"installUser"`
+	Dependencies []Dependency    `json:"dependencies"`
+	Deployments []Deployment     `json:"deployments"`
+	InstallPassword string       `json:"installPassword"`
+	InstallUser string           `json:"installUser"`
 	//TODO: Add data as needed
 }
 
 
 type LubeNodeFeatures map[string] bool
 
-func(ma *LubeNode) NeedsAdapting() bool{
+func(ma *Node) NeedsAdapting() bool{
 	return ma.Status == NodeStatusNew || ma.Status == NodeStatusActive || ma.Status == NodeStatusRetrying
 }
-func(ma *LubeNode) Retry() (*LubeNode, error){
-	if(ma.Retries> 10){
-		ma.Status = NodeStatusFailing
-		ma, err := ma.Persist()
-
-		if(err!=nil){
-			return ma, err
-		}
-		return ma, nil
+func(n *Node) Retry() (*Node){
+	if(n.Retries> 10){
+		n.Status = NodeStatusFailing
+		return n
 	}
 
-	ma.Retries = ma.Retries+1
-	ma.Status = NodeStatusRetrying
-	ma, err := ma.Persist()
-
-	if(err!=nil){
-		return ma, err
-	}
-
-	return ma, nil
-
+	n.Retries = n.Retries+1
+	n.Status = NodeStatusRetrying
+	return n
 }
 
-func (ma *LubeNode) Persist() (*LubeNode,error) {
-	cfg, err := ParseLubeConfig(config.LubeConfigPath())
-	if(err!=nil){
-		return ma, err
-	}
-
-
-	ma.Updated = time.Now()
-	_, err = cfg.UpdateNode(ma)
-
-	if(err!=nil){
-		return ma, err
-	}
-
-	return ma, nil
-}
-
-func (ma *LubeNode) Requires(dependency string) bool {
+func (ma *Node) Requires(dependency string) bool {
 	for i := range ma.Dependencies {
 		if(ma.Dependencies[i].Name == dependency){
 			if(ma.Dependencies[i].Status == DependencyStatusNew ||
@@ -104,7 +75,7 @@ func (ma *LubeNode) Requires(dependency string) bool {
 	return false
 }
 
-func (ma *LubeNode) Fulfils(dependency string) bool {
+func (ma *Node) Fulfils(dependency string) bool {
 	for i := range ma.Dependencies {
 		if(ma.Dependencies[i].Name == dependency){
 			if(ma.Dependencies[i].Status == DependencyStatusReady){

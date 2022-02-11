@@ -19,6 +19,8 @@ type Project struct {
 	Updated time.Time         `json:"updated"`
 	Context string            `json:"context"`
 	Provider string           `json:"provider"`
+	Reserved bool 			`json:"reserved"`
+	Tags []string `json:"tags"`
 }
 
 
@@ -44,6 +46,27 @@ func(lc *Project) WriteJSON(w io.Writer) (error) {
 	}
 
 	return nil
+}
+
+func (p *Project) Reserve() *Project{
+	p.Reserved = true
+	return p
+}
+
+func (p *Project) Tag(tags ...string) *Project {
+
+NewTags:
+	for _, newTag := range tags {
+		for _, tag := range p.Tags {
+			if(tag == newTag) {
+				continue NewTags
+			}
+		}
+		p.Tags = append(p.Tags, newTag)
+	}
+
+	return p
+
 }
 
 func(lc *Project) FindNodeByIPV4(ip net.IP) (*Node){

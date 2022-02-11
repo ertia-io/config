@@ -2,13 +2,14 @@ package entities
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
-	"io/ioutil"
 	"net"
 	"time"
 )
 
 const DefaultProvider = "GLESYS"
+const ErrorNoReservableProjects = "Could not find any available projects to reserve"
 
 type Project struct {
 	ProjectID string          `json:"project"`
@@ -20,8 +21,11 @@ type Project struct {
 	Context string            `json:"context"`
 	Provider string           `json:"provider"`
 	Reserved bool 			`json:"reserved"`
+	Domain string `json:"domain"`
 	Tags []string `json:"tags"`
 }
+
+type Projects []Project
 
 
 func(cfg *Project) WithProvider(provider string) *Project{
@@ -51,6 +55,16 @@ func(lc *Project) WriteJSON(w io.Writer) (error) {
 func (p *Project) Reserve() *Project{
 	p.Reserved = true
 	return p
+}
+
+func (p *Project) HasTag(tag string) bool {
+	for _,t := range p.Tags {
+		if(t == tag ) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (p *Project) Tag(tags ...string) *Project {
@@ -150,15 +164,21 @@ func (lc *Project) RemoveKey(key *SSHKey) (*Project) {
 }
 
 
-func ParseConfig(path string) (*Project, error){
-	contents, err := ioutil.ReadFile(path)
+func ParseConfig(jsonStr string) (*Project, error){
+	config := &Project{}
+
+	err := json.Unmarshal([]byte(jsonStr), config)
 	if(err!=nil){
 		return nil, err
 	}
 
-	config := &Project{}
+	return config, nil
+}
 
-	err = json.Unmarshal(contents, config)
+func ParseProjects(jsonStr string) (Projects, error){
+	config := []Project{}
+
+	err := json.Unmarshal([]byte(jsonStr), &config)
 	if(err!=nil){
 		return nil, err
 	}
@@ -194,6 +214,14 @@ func WithName(projectId string) ProjectOption {
 		return cfg
 	}
 }
+
+func WithDomain(domain string) ProjectOption {
+	return func(cfg *Project) *Project{
+		cfg.Domain = domain
+		return cfg
+	}
+}
+
 
 
 
@@ -231,3 +259,14 @@ func NewProject(opts ...ProjectOption) (*Project, error){
 
 	return project,nil
 }
+
+func(ps Projects) ReserveOne() (Projects, *Project, error){
+	for i, p := range ps {
+		if(p.Reserved == false && !p.HasTag("ertia-pool-master")){
+			ps[i].Reserved = true
+			return ps, &p, nil
+		}
+	}
+	return ps, nil, errors.New(ErrorNoReservableProjects)
+}
+

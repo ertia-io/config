@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/containers/podman/pkg/util"
 	"os"
 	"path/filepath"
 )
@@ -11,7 +10,7 @@ func ErtiaPath() string {
 	if path, ok := os.LookupEnv("ERTIADIR"); ok {
 		configPath = path
 	} else{
-		homeDir, err := util.HomeDir()
+		homeDir, err := os.UserHomeDir()
 		if(err!=nil){
 			homeDir = "/opt/ertia/"
 		}

@@ -13,6 +13,7 @@ const ErrorNoReservableProjects = "Could not find any available projects to rese
 
 type Project struct {
 	ProjectID string          `json:"project"`
+	Name string 				`json:"name"`
 	APIToken string           `json:"apiToken"`
 	SSHKey *SSHKey `json:"sshKey"`
 	Nodes []Node              `json:"nodes"`
@@ -33,10 +34,16 @@ func(cfg *Project) WithProvider(provider string) *Project{
 	return cfg
 }
 
+func(cfg *Project) WithName(name string) *Project{
+	cfg.Name = name
+	return cfg
+}
+
 func(cfg *Project) WithAPIToken(apiToken string) *Project{
 	cfg.APIToken = apiToken
 	return cfg
 }
+
 
 func(lc *Project) ToJSON() ([]byte, error) {
 	return json.MarshalIndent(lc,"","  ")
@@ -208,9 +215,9 @@ func WithID(projectId string) ProjectOption {
 }
 
 
-func WithName(projectId string) ProjectOption {
+func WithName(name string) ProjectOption {
 	return func(cfg *Project) *Project{
-		cfg.ProjectID = projectId
+		cfg.Name = name
 		return cfg
 	}
 }
@@ -221,7 +228,6 @@ func WithDomain(domain string) ProjectOption {
 		return cfg
 	}
 }
-
 
 
 

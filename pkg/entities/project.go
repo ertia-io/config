@@ -53,6 +53,12 @@ func(cfg *Project) WithName(name string) *Project{
 	return cfg
 }
 
+func(cfg *Project) WithDeployments(deployments ...Deployment) *Project{
+	cfg.Deployments = deployments
+	return cfg
+}
+
+
 
 
 func(lc *Project) ToJSON() ([]byte, error) {
@@ -260,6 +266,13 @@ func WithName(name string) ProjectOption {
 func WithDomain(domain string) ProjectOption {
 	return func(cfg *Project) *Project{
 		cfg.Domain = domain
+		return cfg
+	}
+}
+
+func WithDeployments(deployments ...Deployment) ProjectOption {
+	return func(cfg *Project) *Project{
+		cfg.Deployments = deployments
 		return cfg
 	}
 }

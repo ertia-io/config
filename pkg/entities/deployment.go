@@ -4,7 +4,7 @@ const (
 	DeploymentStatusNew = "NEW"
 	DeploymentStatusDeploying = "DEPLOYING"
 	DeploymentStatusFailing = "FAILING"
-	DeploymentStatusRetrying = "READY"
+	DeploymentStatusRetrying = "RETRYING"
 	DeploymentStatusReady = "READY"
 )
 

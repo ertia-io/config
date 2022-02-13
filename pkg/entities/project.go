@@ -24,7 +24,7 @@ type Project struct {
 	Created time.Time         `json:"created"`
 	Updated time.Time         `json:"updated"`
 	Context string            `json:"context"`
-
+	Deployments     []Deployment `json:"deployments"`
 	Reserved bool 			`json:"reserved"`
 	Domain string `json:"domain"`
 	Tags []string `json:"tags"`

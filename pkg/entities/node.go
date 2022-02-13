@@ -38,7 +38,6 @@ type Node struct {
 	Deleted         *time.Time   `json:"deleted"`
 	Features        NodeFeatures `json:"features"`
 	Dependencies    []Dependency `json:"dependencies"`
-	Deployments     []Deployment `json:"deployments"`
 	InstallPassword string       `json:"installPassword"`
 	InstallUser     string       `json:"installUser"`
 	//TODO: Add data as needed

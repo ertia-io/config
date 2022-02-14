@@ -60,25 +60,10 @@ func GetPublicKeys() (*SSHKey,*rsa.PrivateKey, error){
 		return nil,nil, err
 	}
 
-/*
-	err = ioutil.WriteFile(config.LubeKeysPath()+"/"+id,encodePrivateKeyToPEM(privateKey),0600)
-	if(err!=nil){
-		return nil, err
-	}
-*/
-
-
 	pubKey, err := generatePublicKey(&privateKey.PublicKey)
 	if(err!=nil){
 		return nil, privateKey, err
 	}
-/*
-	err = ioutil.WriteFile(config.LubeKeysPath()+"/"+id+".pub",pubKey,0600)
-	if(err!=nil){
-		return nil, err
-	}
-
- */
 
 	return &SSHKey{
 			ID: id,

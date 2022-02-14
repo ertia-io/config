@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"crypto/rsa"
 	"encoding/json"
 	"errors"
 	"github.com/lucasepe/codename"
@@ -278,7 +279,7 @@ func WithDeployments(deployments ...Deployment) ProjectOption {
 }
 
 
-func NewProject(opts ...ProjectOption) (*Project, error){
+func NewProject(opts ...ProjectOption) (*Project, *rsa.PrivateKey, error){
 
 	project := &Project{
 		Created: time.Now(),
@@ -292,18 +293,18 @@ func NewProject(opts ...ProjectOption) (*Project, error){
 	}
 
 
-	pKey,_, err := GetPublicKeys()
+	key, privkey, err := GetPublicKeys()
 	if (err != nil) {
-		return nil,err
+		return nil,nil,err
 	}
 
-	project.SSHKey = pKey
+	project.SSHKey = key
 
 	if (err != nil) {
-		return nil,err
+		return nil,nil,err
 	}
 
-	return project,nil
+	return project,privkey,nil
 }
 
 func(ps Projects) ReserveOne() (Projects, *Project, error){

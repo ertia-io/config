@@ -40,6 +40,7 @@ type Node struct {
 	Dependencies    []Dependency `json:"dependencies"`
 	InstallPassword string       `json:"installPassword"`
 	InstallUser     string       `json:"installUser"`
+	Delete *time.Time `json:"delete"`
 	//TODO: Add data as needed
 }
 

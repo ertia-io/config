@@ -13,6 +13,8 @@ import (
 const DefaultProvider = "GLESYS"
 const ErrorNoReservableProjects = "Could not find any available projects to reserve"
 
+const ReserveGraceTime = time.Hour * 4
+
 type Project struct {
 	ID string `json:"id"`
 	Provider string           `json:"provider"`
@@ -78,6 +80,8 @@ func(lc *Project) WriteJSON(w io.Writer) (error) {
 
 func (p *Project) Reserve() *Project{
 	p.Reserved = true
+	deleteTime := time.Now().Add(ReserveGraceTime)
+	p.Delete = &deleteTime
 	return p
 }
 
@@ -313,6 +317,8 @@ func(ps Projects) ReserveOne() (Projects, *Project, error){
 	for i, p := range ps {
 		if(p.Reserved == false && !p.HasTag("ertia-pool-master")){
 			ps[i].Reserved = true
+			deleteTime := time.Now().Add(ReserveGraceTime)
+			ps[i].Delete = &deleteTime
 			return ps, &p, nil
 		}
 	}

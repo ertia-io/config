@@ -315,7 +315,7 @@ func NewProject(opts ...ProjectOption) (*Project, error){
 
 func(ps Projects) ReserveOne() (Projects, *Project, error){
 	for i, p := range ps {
-		if(p.Reserved == false && !p.HasTag("ertia-pool-master")){
+		if(p.Reserved == false && p.Delete == nil){
 			ps[i].Reserved = true
 			deleteTime := time.Now().Add(ReserveGraceTime)
 			ps[i].Delete = &deleteTime

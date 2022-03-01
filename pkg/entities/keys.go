@@ -63,6 +63,10 @@ func GenerateKeyPair() (*SSHKey, error) {
 	// Serialize public key use in OpenSSH authorized_keys.
 	publicKey := ssh.MarshalAuthorizedKey(publicKeyInst)
 
+	// Fingerprint as unpadded base64 encoded sha256 hash.
+	// RFC4648 #section3-2 (unpadded base64 encoding)
+	fingerprint := ssh.FingerprintSHA256(publicKeyInst)
+
 	// Encode private key in PEM format.
 	privateKey := pem.EncodeToMemory(&pem.Block{
 		Type:  "OPENSSH PRIVATE KEY",
@@ -74,7 +78,7 @@ func GenerateKeyPair() (*SSHKey, error) {
 		Name:        id,
 		PrivateKey:  string(privateKey),
 		PublicKey:   strings.TrimRight(string(publicKey), "\n"),
-		Fingerprint: "",
+		Fingerprint: fingerprint,
 		Status:      KeyStatusNew,
 		Created:     now,
 		Updated:     now,

@@ -36,39 +36,40 @@ type Project struct {
 
 type Projects []Project
 
-func (cfg *Project) WithProvider(provider string) *Project {
-	cfg.Provider = provider
-	return cfg
+func (p *Project) WithProvider(provider string) *Project {
+	p.Provider = provider
+	return p
 }
 
-func (cfg *Project) WithProviderID(providerProjectId string) *Project {
-	cfg.ProviderID = providerProjectId
-	return cfg
+func (p *Project) WithProviderID(providerProjectId string) *Project {
+	p.ProviderID = providerProjectId
+	return p
 }
 
-func (cfg *Project) WithProviderToken(token string) *Project {
-	cfg.ProviderToken = token
-	return cfg
+func (p *Project) WithProviderToken(token string) *Project {
+	p.ProviderToken = token
+	return p
 }
 
-func (cfg *Project) WithName(name string) *Project {
-	cfg.Name = name
-	return cfg
+func (p *Project) WithName(name string) *Project {
+	p.Name = name
+	return p
 }
 
-func (cfg *Project) WithDeployments(deployments ...Deployment) *Project {
-	cfg.Deployments = deployments
-	return cfg
+func (p *Project) WithDeployments(deployments ...Deployment) *Project {
+	p.Deployments = deployments
+	return p
 }
 
-func (lc *Project) ToJSON() ([]byte, error) {
-	return json.MarshalIndent(lc, "", "  ")
+func (p *Project) ToJSON() ([]byte, error) {
+	return json.MarshalIndent(p, "", "  ")
 }
 
-func (lc *Project) WriteJSON(w io.Writer) error {
+func (p *Project) WriteJSON(w io.Writer) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(lc); err != nil {
+
+	if err := enc.Encode(p); err != nil {
 		return err
 	}
 
@@ -105,80 +106,79 @@ NewTags:
 	}
 
 	return p
-
 }
 
-func (lc *Project) FindNodeByIPV4(ip net.IP) *Node {
+func (p *Project) FindNodeByIPV4(ip net.IP) *Node {
 
-	for mi := range lc.Nodes {
-		if lc.Nodes[mi].IPV4.Equal(ip) {
-			return &lc.Nodes[mi]
+	for mi := range p.Nodes {
+		if p.Nodes[mi].IPV4.Equal(ip) {
+			return &p.Nodes[mi]
 		}
 	}
+
 	return nil
 }
 
-func (lc *Project) FindNodeByID(id string) *Node {
-	for mi := range lc.Nodes {
-		if lc.Nodes[mi].ID == id {
-			return &lc.Nodes[mi]
+func (p *Project) FindNodeByID(id string) *Node {
+	for mi := range p.Nodes {
+		if p.Nodes[mi].ID == id {
+			return &p.Nodes[mi]
 		}
 	}
+
 	return nil
 }
 
-func (lc *Project) FindNodeByName(name string) *Node {
-	for mi := range lc.Nodes {
-		if lc.Nodes[mi].Name == name {
-			return &lc.Nodes[mi]
+func (p *Project) FindNodeByName(name string) *Node {
+	for mi := range p.Nodes {
+		if p.Nodes[mi].Name == name {
+			return &p.Nodes[mi]
 		}
 	}
+
 	return nil
 }
 
-func (lc *Project) FindMasterNode() *Node {
-	for mi := range lc.Nodes {
-		if lc.Nodes[mi].IsMaster {
-			return &lc.Nodes[mi]
+func (p *Project) FindMasterNode() *Node {
+	for mi := range p.Nodes {
+		if p.Nodes[mi].IsMaster {
+			return &p.Nodes[mi]
 		}
 	}
+
 	return nil
 }
 
-func (lc *Project) UpdateNode(node *Node) *Project {
-
+func (p *Project) UpdateNode(node *Node) *Project {
 	node.Updated = time.Now()
 
-	for mi := range lc.Nodes {
-		if lc.Nodes[mi].ID == node.ID {
-			lc.Nodes[mi] = *node
+	for mi := range p.Nodes {
+		if p.Nodes[mi].ID == node.ID {
+			p.Nodes[mi] = *node
 		}
 	}
 
-	return lc
+	return p
 }
 
-func (lc *Project) RemoveNode(node *Node) *Project {
-
-	for mi := range lc.Nodes {
-		if lc.Nodes[mi].ID == node.ID {
-			lc.Nodes = removeNode(lc.Nodes, mi)
+func (p *Project) RemoveNode(node *Node) *Project {
+	for mi := range p.Nodes {
+		if p.Nodes[mi].ID == node.ID {
+			p.Nodes = removeNode(p.Nodes, mi)
 		}
 	}
-	return lc
+
+	return p
 }
 
-func (lc *Project) UpdateKey(key *SSHKey) *Project {
-
-	lc.SSHKey = key
-
-	return lc
+func (p *Project) UpdateKey(key *SSHKey) *Project {
+	p.SSHKey = key
+	return p
 }
 
-func (lc *Project) RemoveKey(key *SSHKey) *Project {
-
-	lc.SSHKey = nil
-	return lc
+func (p *Project) RemoveKey(key *SSHKey) *Project {
+	p.SSHKey = nil
+	return p
 }
 
 func ParseConfig(jsonStr string) (*Project, error) {
@@ -307,11 +307,11 @@ func NodeName() string {
 
 }
 
-func (cfg *Project) AddNode() (*Project, *Node, error) {
+func (p *Project) AddNode() (*Project, *Node, error) {
 
 	thisIsMaster := true
 
-	master := cfg.FindMasterNode()
+	master := p.FindMasterNode()
 
 	var masterIp net.IP
 	var nodeToken string
@@ -334,7 +334,7 @@ func (cfg *Project) AddNode() (*Project, *Node, error) {
 		Features:  NodeFeatures{},
 	}
 
-	cfg.Nodes = append(cfg.Nodes, newNode)
+	p.Nodes = append(p.Nodes, newNode)
 
-	return cfg, &newNode, nil
+	return p, &newNode, nil
 }

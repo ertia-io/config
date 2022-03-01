@@ -5,10 +5,11 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/teris-io/shortid"
-	"golang.org/x/crypto/ssh"
 	"log"
 	"time"
+
+	"github.com/teris-io/shortid"
+	"golang.org/x/crypto/ssh"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
 )
 
 type SSHKey struct {
-	ID          string    `json:"id""`
+	ID          string    `json:"id"`
 	ProviderID  string    `json:"providerId"`
 	Name        string    `json:"name"`
 	Status      string    `json:"status"`

@@ -22,6 +22,7 @@ var (
 
 type SSHKey struct {
 	ID          string    `json:"id"`
+	ProviderID  string    `json:"providerId"`
 	Name        string    `json:"name"`
 	Status      string    `json:"status"`
 	Fingerprint string    `json:"fingerprint"`

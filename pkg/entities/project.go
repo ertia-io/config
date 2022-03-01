@@ -3,11 +3,12 @@ package entities
 import (
 	"encoding/json"
 	"errors"
-	"github.com/lucasepe/codename"
-	"github.com/segmentio/ksuid"
 	"io"
 	"net"
 	"time"
+
+	"github.com/lucasepe/codename"
+	"github.com/segmentio/ksuid"
 )
 
 const DefaultProvider = "GLESYS"
@@ -264,7 +265,6 @@ func WithDeployments(deployments ...Deployment) ProjectOption {
 }
 
 func NewProject(opts ...ProjectOption) (*Project, error) {
-
 	project := &Project{
 		Created:  time.Now(),
 		Updated:  time.Now(),
@@ -276,18 +276,12 @@ func NewProject(opts ...ProjectOption) (*Project, error) {
 		project = opt(project)
 	}
 
-	key, privkey, err := GetPublicKeys()
+	key, err := GenerateKeyPair()
 	if err != nil {
 		return nil, err
 	}
-
-	key.PrivateKey = string(encodePrivateKeyToPEM(privkey))
 
 	project.SSHKey = key
-
-	if err != nil {
-		return nil, err
-	}
 
 	return project, nil
 }

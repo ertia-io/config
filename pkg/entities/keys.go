@@ -1,13 +1,13 @@
 package entities
 
 import (
+	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/pem"
-	"log"
+	"strings"
 	"time"
 
+	"github.com/mikesmitty/edkey"
 	"github.com/teris-io/shortid"
 	"golang.org/x/crypto/ssh"
 )
@@ -22,7 +22,6 @@ var (
 
 type SSHKey struct {
 	ID          string    `json:"id"`
-	ProviderID  string    `json:"providerId"`
 	Name        string    `json:"name"`
 	Status      string    `json:"status"`
 	Fingerprint string    `json:"fingerprint"`
@@ -40,68 +39,43 @@ func (k *SSHKey) NeedsAdapting() bool {
 	return false
 }
 
-func GetPublicKeys() (*SSHKey, *rsa.PrivateKey, error) {
-
-	id, err := shortid.Generate()
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Validate Private Key
-	err = privateKey.Validate()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pubKey, err := generatePublicKey(&privateKey.PublicKey)
-	if err != nil {
-		return nil, privateKey, err
-	}
-
-	return &SSHKey{
-		ID:        id,
-		Name:      id,
-		PublicKey: string(pubKey),
-		Status:    KeyStatusNew,
-	}, privateKey, nil
-
-}
-
-// encodePrivateKeyToPEM encodes Private Key from RSA to PEM format
-func encodePrivateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
-	// Get ASN.1 DER format
-	privDER := x509.MarshalPKCS1PrivateKey(privateKey)
-
-	// pem.Block
-	privBlock := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   privDER,
-	}
-
-	// Private key in PEM format
-	privatePEM := pem.EncodeToMemory(&privBlock)
-
-	return privatePEM
-}
-
-// generatePublicKey take a rsa.PublicKey and return bytes suitable for writing to .pub file
-// returns in the format "ssh-rsa ..."
-func generatePublicKey(privatekey *rsa.PublicKey) ([]byte, error) {
-	publicRsaKey, err := ssh.NewPublicKey(privatekey)
+// GenerateKeyPair creates a SSH key pair (Ed25519).
+func GenerateKeyPair() (*SSHKey, error) {
+	pubKey, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
 	}
 
-	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
+	// Public key instance.
+	publicKeyInst, err := ssh.NewPublicKey(pubKey)
+	if err != nil {
+		return nil, err
+	}
 
-	log.Println("Public key generated")
-	return pubKeyBytes, nil
+	id, err := shortid.Generate()
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+
+	// Serialize public key use in OpenSSH authorized_keys.
+	publicKey := ssh.MarshalAuthorizedKey(publicKeyInst)
+
+	// Encode private key in PEM format.
+	privateKey := pem.EncodeToMemory(&pem.Block{
+		Type:  "OPENSSH PRIVATE KEY",
+		Bytes: edkey.MarshalED25519PrivateKey(privKey),
+	})
+
+	return &SSHKey{
+		ID:          id,
+		Name:        id,
+		PrivateKey:  string(privateKey),
+		PublicKey:   strings.TrimRight(string(publicKey), "\n"),
+		Fingerprint: "",
+		Status:      KeyStatusNew,
+		Created:     now,
+		Updated:     now,
+	}, nil
 }

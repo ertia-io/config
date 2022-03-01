@@ -9,9 +9,9 @@ func ErtiaPath() string {
 	var configPath string
 	if path, ok := os.LookupEnv("ERTIADIR"); ok {
 		configPath = path
-	} else{
+	} else {
 		homeDir, err := os.UserHomeDir()
-		if(err!=nil){
+		if err != nil {
 			homeDir = "/opt/ertia/"
 		}
 		configPath = filepath.Join(homeDir, ".ertia", ErtiaContext())
@@ -23,8 +23,8 @@ func ErtiaConfigPath() string {
 	var configPath string
 	if path, ok := os.LookupEnv("ERTIACONFIG"); ok {
 		configPath = path
-	} else{
-		configPath = filepath.Join(ErtiaPath(),"/config.json")
+	} else {
+		configPath = filepath.Join(ErtiaPath(), "/config.json")
 	}
 	return configPath
 }
@@ -33,33 +33,31 @@ func ErtiaKeysPath() string {
 	var configPath string
 	if path, ok := os.LookupEnv("ERTIAKEYS"); ok {
 		configPath = path
-	} else{
-		configPath = filepath.Join(ErtiaPath(),"/.ssh")
+	} else {
+		configPath = filepath.Join(ErtiaPath(), "/.ssh")
 	}
 	return configPath
 }
-
 
 func ErtiaKubePath() string {
 	var configPath string
 	if path, ok := os.LookupEnv("ERTIAKUBE"); ok {
 		configPath = path
-	} else{
-		configPath = filepath.Join(ErtiaPath(),"/.kube")
+	} else {
+		configPath = filepath.Join(ErtiaPath(), "/.kube")
 	}
 	return configPath
 }
 
 func ErtiaKubeConfigPath() string {
-	return filepath.Join(ErtiaKubePath(),"/config")
+	return filepath.Join(ErtiaKubePath(), "/config")
 }
-
 
 func ErtiaContext() string {
 	var ertiaContext string
 	if lc, ok := os.LookupEnv("ERTIACONTEXT"); ok {
 		ertiaContext = lc
-	} else{
+	} else {
 		ertiaContext = "DEFAULT"
 	}
 	return ertiaContext

@@ -11,67 +11,65 @@ import (
 	"time"
 )
 
-var(
-	KeyStatusNew = "NEW"
+var (
+	KeyStatusNew      = "NEW"
 	KeyStatusAdapting = "ADAPTING"
-	KeyStatusActive = "ACTIVE"
-	KeyStatusFailing = "FAILING"
-	KeyStatusDeleted = "DELETED"
+	KeyStatusActive   = "ACTIVE"
+	KeyStatusFailing  = "FAILING"
+	KeyStatusDeleted  = "DELETED"
 )
 
 type SSHKey struct {
-	ID string `json:"id""`
-	ProviderID string `json:"providerId"`
-	Name string `json:"name"`
-	Status string `json:"status"`
-	Fingerprint string `json:"fingerprint"`
-	Error string `json:"error"`
-	PrivateKey string `json:"privateKey"`
-	PublicKey string `json:"publicKey"`
-	Created time.Time `json:"created"`
-	Updated time.Time `json:"updated"`
+	ID          string    `json:"id""`
+	ProviderID  string    `json:"providerId"`
+	Name        string    `json:"name"`
+	Status      string    `json:"status"`
+	Fingerprint string    `json:"fingerprint"`
+	Error       string    `json:"error"`
+	PrivateKey  string    `json:"privateKey"`
+	PublicKey   string    `json:"publicKey"`
+	Created     time.Time `json:"created"`
+	Updated     time.Time `json:"updated"`
 }
 
-func(k *SSHKey) NeedsAdapting() bool{
-	if(k.Status == KeyStatusNew){
+func (k *SSHKey) NeedsAdapting() bool {
+	if k.Status == KeyStatusNew {
 		return true
 	}
 	return false
 }
 
-func GetPublicKeys() (*SSHKey,*rsa.PrivateKey, error){
+func GetPublicKeys() (*SSHKey, *rsa.PrivateKey, error) {
 
 	id, err := shortid.Generate()
 
-	if(err!=nil){
-		return nil,nil, err
+	if err != nil {
+		return nil, nil, err
 	}
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
-
 
 	// Validate Private Key
 	err = privateKey.Validate()
 	if err != nil {
-		return nil,nil, err
+		return nil, nil, err
 	}
 
 	pubKey, err := generatePublicKey(&privateKey.PublicKey)
-	if(err!=nil){
+	if err != nil {
 		return nil, privateKey, err
 	}
 
 	return &SSHKey{
-			ID: id,
-			Name: id,
-			PublicKey: string(pubKey),
-			Status: KeyStatusNew,
-
-	},privateKey, nil
+		ID:        id,
+		Name:      id,
+		PublicKey: string(pubKey),
+		Status:    KeyStatusNew,
+	}, privateKey, nil
 
 }
 

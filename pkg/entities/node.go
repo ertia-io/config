@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-
-
 const (
 	NodeStatusNew        = "NEW"
 	NodeStatusDeploying  = "DEPLOYING"
@@ -21,11 +19,11 @@ const (
 )
 
 type Node struct {
-	ID          string           `json:"id"`
-	ProviderID  string           `json:"providerId"`
-	NodeToken  string           `json:"nodeToken"`
-	IsMaster    bool             `json:"isMaster"`
-	MasterIP    net.IP			 `json:"masterIP"`
+	ID              string       `json:"id"`
+	ProviderID      string       `json:"providerId"`
+	NodeToken       string       `json:"nodeToken"`
+	IsMaster        bool         `json:"isMaster"`
+	MasterIP        net.IP       `json:"masterIP"`
 	Tags            []string     `json:"tags"`
 	Name            string       `json:"name"`
 	IPV4            net.IP       `json:"ipv4"`
@@ -40,33 +38,32 @@ type Node struct {
 	Dependencies    []Dependency `json:"dependencies"`
 	InstallPassword string       `json:"installPassword"`
 	InstallUser     string       `json:"installUser"`
-	Delete *time.Time `json:"delete"`
+	Delete          *time.Time   `json:"delete"`
 	//TODO: Add data as needed
 }
 
+type NodeFeatures map[string]bool
 
-type NodeFeatures map[string] bool
-
-func(ma *Node) NeedsAdapting() bool{
+func (ma *Node) NeedsAdapting() bool {
 	return ma.Status == NodeStatusNew || ma.Status == NodeStatusActive || ma.Status == NodeStatusRetrying
 }
-func(n *Node) Retry() (*Node){
-	if(n.Retries> 10){
+func (n *Node) Retry() *Node {
+	if n.Retries > 10 {
 		n.Status = NodeStatusFailing
 		return n
 	}
 
-	n.Retries = n.Retries+1
+	n.Retries = n.Retries + 1
 	n.Status = NodeStatusRetrying
 	return n
 }
 
 func (ma *Node) Requires(dependency string) bool {
 	for i := range ma.Dependencies {
-		if(ma.Dependencies[i].Name == dependency){
-			if(ma.Dependencies[i].Status == DependencyStatusNew ||
+		if ma.Dependencies[i].Name == dependency {
+			if ma.Dependencies[i].Status == DependencyStatusNew ||
 				ma.Dependencies[i].Status == DependencyStatusRetrying ||
-				ma.Dependencies[i].Status == DependencyStatusWaiting ){
+				ma.Dependencies[i].Status == DependencyStatusWaiting {
 				return true
 			}
 		}
@@ -76,8 +73,8 @@ func (ma *Node) Requires(dependency string) bool {
 
 func (ma *Node) Fulfils(dependency string) bool {
 	for i := range ma.Dependencies {
-		if(ma.Dependencies[i].Name == dependency){
-			if(ma.Dependencies[i].Status == DependencyStatusReady){
+		if ma.Dependencies[i].Name == dependency {
+			if ma.Dependencies[i].Status == DependencyStatusReady {
 				return true
 			}
 		}

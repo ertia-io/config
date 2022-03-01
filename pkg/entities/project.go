@@ -16,61 +16,57 @@ const ErrorNoReservableProjects = "Could not find any available projects to rese
 const ReserveGraceTime = time.Hour * 4
 
 type Project struct {
-	ID string `json:"id"`
-	Provider string           `json:"provider"`
-	ProviderID string `json:"providerID"` // Provider Project ID
-	ProviderToken string `json:"providerToken"`
-	Name string 				`json:"name"`
-	SSHKey *SSHKey `json:"sshKey"`
-	Nodes []Node              `json:"nodes"`
-	Created time.Time         `json:"created"`
-	Updated time.Time         `json:"updated"`
-	Context string            `json:"context"`
-	Deployments     []Deployment `json:"deployments"`
-	Reserved bool 			`json:"reserved"`
-	Delete *time.Time `json:"delete"`
-	Domain string `json:"domain"`
-	Tags []string `json:"tags"`
+	ID            string       `json:"id"`
+	Provider      string       `json:"provider"`
+	ProviderID    string       `json:"providerID"` // Provider Project ID
+	ProviderToken string       `json:"providerToken"`
+	Name          string       `json:"name"`
+	SSHKey        *SSHKey      `json:"sshKey"`
+	Nodes         []Node       `json:"nodes"`
+	Created       time.Time    `json:"created"`
+	Updated       time.Time    `json:"updated"`
+	Context       string       `json:"context"`
+	Deployments   []Deployment `json:"deployments"`
+	Reserved      bool         `json:"reserved"`
+	Delete        *time.Time   `json:"delete"`
+	Domain        string       `json:"domain"`
+	Tags          []string     `json:"tags"`
 }
 
 type Projects []Project
 
-
-func(cfg *Project) WithProvider(provider string) *Project{
+func (cfg *Project) WithProvider(provider string) *Project {
 	cfg.Provider = provider
 	return cfg
 }
 
-func(cfg *Project) WithProviderID(providerProjectId string) *Project{
+func (cfg *Project) WithProviderID(providerProjectId string) *Project {
 	cfg.ProviderID = providerProjectId
 	return cfg
 }
 
-func(cfg *Project) WithProviderToken(token string) *Project{
+func (cfg *Project) WithProviderToken(token string) *Project {
 	cfg.ProviderToken = token
 	return cfg
 }
 
-func(cfg *Project) WithName(name string) *Project{
+func (cfg *Project) WithName(name string) *Project {
 	cfg.Name = name
 	return cfg
 }
 
-func(cfg *Project) WithDeployments(deployments ...Deployment) *Project{
+func (cfg *Project) WithDeployments(deployments ...Deployment) *Project {
 	cfg.Deployments = deployments
 	return cfg
 }
 
-
-
-
-func(lc *Project) ToJSON() ([]byte, error) {
-	return json.MarshalIndent(lc,"","  ")
+func (lc *Project) ToJSON() ([]byte, error) {
+	return json.MarshalIndent(lc, "", "  ")
 }
 
-func(lc *Project) WriteJSON(w io.Writer) (error) {
+func (lc *Project) WriteJSON(w io.Writer) error {
 	enc := json.NewEncoder(w)
-	enc.SetIndent("","  ")
+	enc.SetIndent("", "  ")
 	if err := enc.Encode(lc); err != nil {
 		return err
 	}
@@ -78,7 +74,7 @@ func(lc *Project) WriteJSON(w io.Writer) (error) {
 	return nil
 }
 
-func (p *Project) Reserve() *Project{
+func (p *Project) Reserve() *Project {
 	p.Reserved = true
 	deleteTime := time.Now().Add(ReserveGraceTime)
 	p.Delete = &deleteTime
@@ -86,8 +82,8 @@ func (p *Project) Reserve() *Project{
 }
 
 func (p *Project) HasTag(tag string) bool {
-	for _,t := range p.Tags {
-		if(t == tag ) {
+	for _, t := range p.Tags {
+		if t == tag {
 			return true
 		}
 	}
@@ -100,7 +96,7 @@ func (p *Project) Tag(tags ...string) *Project {
 NewTags:
 	for _, newTag := range tags {
 		for _, tag := range p.Tags {
-			if(tag == newTag) {
+			if tag == newTag {
 				continue NewTags
 			}
 		}
@@ -111,53 +107,49 @@ NewTags:
 
 }
 
-func(lc *Project) FindNodeByIPV4(ip net.IP) (*Node){
+func (lc *Project) FindNodeByIPV4(ip net.IP) *Node {
 
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].IPV4.Equal(ip)){
+		if lc.Nodes[mi].IPV4.Equal(ip) {
 			return &lc.Nodes[mi]
 		}
 	}
 	return nil
 }
 
-
-func(lc *Project) FindNodeByID(id string) (*Node){
+func (lc *Project) FindNodeByID(id string) *Node {
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].ID == id){
+		if lc.Nodes[mi].ID == id {
 			return &lc.Nodes[mi]
 		}
 	}
 	return nil
 }
 
-
-func(lc *Project) FindNodeByName(name string) (*Node){
+func (lc *Project) FindNodeByName(name string) *Node {
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].Name == name){
+		if lc.Nodes[mi].Name == name {
 			return &lc.Nodes[mi]
 		}
 	}
 	return nil
 }
 
-func(lc *Project) FindMasterNode() (*Node){
+func (lc *Project) FindMasterNode() *Node {
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].IsMaster){
+		if lc.Nodes[mi].IsMaster {
 			return &lc.Nodes[mi]
 		}
 	}
 	return nil
 }
 
+func (lc *Project) UpdateNode(node *Node) *Project {
 
-
-func (lc *Project) UpdateNode(node *Node) (*Project) {
-
-	node.Updated=time.Now()
+	node.Updated = time.Now()
 
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].ID == node.ID){
+		if lc.Nodes[mi].ID == node.ID {
 			lc.Nodes[mi] = *node
 		}
 	}
@@ -165,49 +157,45 @@ func (lc *Project) UpdateNode(node *Node) (*Project) {
 	return lc
 }
 
-
-func (lc *Project) RemoveNode(node *Node) (*Project) {
+func (lc *Project) RemoveNode(node *Node) *Project {
 
 	for mi := range lc.Nodes {
-		if(lc.Nodes[mi].ID == node.ID){
-			lc.Nodes = removeNode(lc.Nodes, mi )
+		if lc.Nodes[mi].ID == node.ID {
+			lc.Nodes = removeNode(lc.Nodes, mi)
 		}
 	}
 	return lc
 }
 
-
-
-func (lc *Project) UpdateKey(key *SSHKey) (*Project) {
+func (lc *Project) UpdateKey(key *SSHKey) *Project {
 
 	lc.SSHKey = key
 
 	return lc
 }
 
-func (lc *Project) RemoveKey(key *SSHKey) (*Project) {
+func (lc *Project) RemoveKey(key *SSHKey) *Project {
 
 	lc.SSHKey = nil
 	return lc
 }
 
-
-func ParseConfig(jsonStr string) (*Project, error){
+func ParseConfig(jsonStr string) (*Project, error) {
 	config := &Project{}
 
 	err := json.Unmarshal([]byte(jsonStr), config)
-	if(err!=nil){
+	if err != nil {
 		return nil, err
 	}
 
 	return config, nil
 }
 
-func ParseProjects(jsonStr string) (Projects, error){
+func ParseProjects(jsonStr string) (Projects, error) {
 	config := []Project{}
 
 	err := json.Unmarshal([]byte(jsonStr), &config)
-	if(err!=nil){
+	if err != nil {
 		return nil, err
 	}
 
@@ -219,103 +207,94 @@ func removeKey(s []SSHKey, i int) []SSHKey {
 	return s[:len(s)-1]
 }
 
-
 func removeNode(s []Node, i int) []Node {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
 }
 
-
 type ProjectOption func(config *Project) *Project
 
 func WithID(id string) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.ID = id
 		return cfg
 	}
 }
 
-
-
 func WithProvider(provider string) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.Provider = provider
 		return cfg
 	}
 }
 
-
 func WithProviderID(projectProviderId string) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.ProviderID = projectProviderId
 		return cfg
 	}
 }
 
-
 func WithProviderToken(token string) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.ProviderToken = token
 		return cfg
 	}
 }
 
-
 func WithName(name string) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.Name = name
 		return cfg
 	}
 }
 
 func WithDomain(domain string) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.Domain = domain
 		return cfg
 	}
 }
 
 func WithDeployments(deployments ...Deployment) ProjectOption {
-	return func(cfg *Project) *Project{
+	return func(cfg *Project) *Project {
 		cfg.Deployments = deployments
 		return cfg
 	}
 }
 
-
-func NewProject(opts ...ProjectOption) (*Project, error){
+func NewProject(opts ...ProjectOption) (*Project, error) {
 
 	project := &Project{
-		Created: time.Now(),
-		Updated: time.Now(),
-		Nodes:[]Node{},
-		Provider:DefaultProvider, //TODO: Pluggable
+		Created:  time.Now(),
+		Updated:  time.Now(),
+		Nodes:    []Node{},
+		Provider: DefaultProvider, //TODO: Pluggable
 	}
 
 	for _, opt := range opts {
 		project = opt(project)
 	}
 
-
 	key, privkey, err := GetPublicKeys()
-	if (err != nil) {
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 
 	key.PrivateKey = string(encodePrivateKeyToPEM(privkey))
 
 	project.SSHKey = key
 
-	if (err != nil) {
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 
-	return project,nil
+	return project, nil
 }
 
-func(ps Projects) ReserveOne() (Projects, *Project, error){
+func (ps Projects) ReserveOne() (Projects, *Project, error) {
 	for i, p := range ps {
-		if(p.Reserved == false && p.Delete == nil){
+		if p.Reserved == false && p.Delete == nil {
 			ps[i].Reserved = true
 			deleteTime := time.Now().Add(ReserveGraceTime)
 			ps[i].Delete = &deleteTime
@@ -325,8 +304,7 @@ func(ps Projects) ReserveOne() (Projects, *Project, error){
 	return ps, nil, errors.New(ErrorNoReservableProjects)
 }
 
-
-func NodeName() string{
+func NodeName() string {
 	rng, err := codename.DefaultRNG()
 	if err != nil {
 		return ""
@@ -335,7 +313,7 @@ func NodeName() string{
 
 }
 
-func (cfg *Project) AddNode() (*Project, *Node, error){
+func (cfg *Project) AddNode() (*Project, *Node, error) {
 
 	thisIsMaster := true
 
@@ -343,23 +321,23 @@ func (cfg *Project) AddNode() (*Project, *Node, error){
 
 	var masterIp net.IP
 	var nodeToken string
-	if(master != nil){
+	if master != nil {
 		thisIsMaster = false
-		masterIp  = master.IPV4
+		masterIp = master.IPV4
 		nodeToken = master.NodeToken
 	}
 
 	newNode := Node{
-		ID:       ksuid.New().String(),
-		Name:     NodeName(),
-		IsMaster: thisIsMaster,
-		MasterIP: masterIp,
+		ID:        ksuid.New().String(),
+		Name:      NodeName(),
+		IsMaster:  thisIsMaster,
+		MasterIP:  masterIp,
 		NodeToken: nodeToken,
-		Status:   NodeStatusNew,
-		Created:  time.Now(),
-		Updated:  time.Now(),
-		Deleted:  nil,
-		Features: NodeFeatures{},
+		Status:    NodeStatusNew,
+		Created:   time.Now(),
+		Updated:   time.Now(),
+		Deleted:   nil,
+		Features:  NodeFeatures{},
 	}
 
 	cfg.Nodes = append(cfg.Nodes, newNode)

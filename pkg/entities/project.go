@@ -94,7 +94,6 @@ func (p *Project) HasTag(tag string) bool {
 }
 
 func (p *Project) Tag(tags ...string) *Project {
-
 NewTags:
 	for _, newTag := range tags {
 		for _, tag := range p.Tags {
@@ -109,7 +108,6 @@ NewTags:
 }
 
 func (p *Project) FindNodeByIPV4(ip net.IP) *Node {
-
 	for mi := range p.Nodes {
 		if p.Nodes[mi].IPV4.Equal(ip) {
 			return &p.Nodes[mi]
@@ -308,13 +306,12 @@ func NodeName() string {
 }
 
 func (p *Project) AddNode() (*Project, *Node, error) {
-
 	thisIsMaster := true
-
 	master := p.FindMasterNode()
 
 	var masterIp net.IP
 	var nodeToken string
+
 	if master != nil {
 		thisIsMaster = false
 		masterIp = master.IPV4

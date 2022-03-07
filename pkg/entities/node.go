@@ -47,6 +47,7 @@ type NodeFeatures map[string]bool
 func (ma *Node) NeedsAdapting() bool {
 	return ma.Status == NodeStatusNew || ma.Status == NodeStatusActive || ma.Status == NodeStatusRetrying
 }
+
 func (n *Node) Retry() *Node {
 	if n.Retries > 10 {
 		n.Status = NodeStatusFailing

@@ -61,5 +61,4 @@ func ErtiaContext() string {
 		ertiaContext = "DEFAULT"
 	}
 	return ertiaContext
-
 }

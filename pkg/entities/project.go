@@ -17,21 +17,22 @@ const ErrorNoReservableProjects = "Could not find any available projects to rese
 const ReserveGraceTime = time.Hour * 4
 
 type Project struct {
-	ID            string       `json:"id"`
-	Provider      string       `json:"provider"`
-	ProviderID    string       `json:"providerID"` // Provider Project ID
-	ProviderToken string       `json:"providerToken"`
-	Name          string       `json:"name"`
-	SSHKey        *SSHKey      `json:"sshKey"`
-	Nodes         []Node       `json:"nodes"`
-	Created       time.Time    `json:"created"`
-	Updated       time.Time    `json:"updated"`
-	Context       string       `json:"context"`
-	Deployments   []Deployment `json:"deployments"`
-	Reserved      bool         `json:"reserved"`
-	Delete        *time.Time   `json:"delete"`
-	Domain        string       `json:"domain"`
-	Tags          []string     `json:"tags"`
+	ID            string         `json:"id"`
+	Provider      string         `json:"provider"`
+	ProviderID    string         `json:"providerID"` // Provider Project ID
+	ProviderToken string         `json:"providerToken"`
+	Name          string         `json:"name"`
+	SSHKey        *SSHKey        `json:"sshKey"`
+	Nodes         []Node         `json:"nodes"`
+	Created       time.Time      `json:"created"`
+	Updated       time.Time      `json:"updated"`
+	Context       string         `json:"context"`
+	Deployments   []Deployment   `json:"deployments"`
+	Reserved      bool           `json:"reserved"`
+	Delete        *time.Time     `json:"delete"`
+	Domain        string         `json:"domain"`
+	Tags          []string       `json:"tags"`
+	Provisionings []Provisioning `json:"provisionings"`
 }
 
 type Projects []Project
@@ -53,6 +54,11 @@ func (p *Project) WithProviderToken(token string) *Project {
 
 func (p *Project) WithName(name string) *Project {
 	p.Name = name
+	return p
+}
+
+func (p *Project) WithProvisionings(provisionings ...Provisioning) *Project {
+	p.Provisionings = provisionings
 	return p
 }
 
@@ -258,6 +264,13 @@ func WithDomain(domain string) ProjectOption {
 func WithDeployments(deployments ...Deployment) ProjectOption {
 	return func(cfg *Project) *Project {
 		cfg.Deployments = deployments
+		return cfg
+	}
+}
+
+func WithProvisionings(Provisionings ...Provisioning) ProjectOption {
+	return func(cfg *Project) *Project {
+		cfg.Provisionings = Provisionings
 		return cfg
 	}
 }

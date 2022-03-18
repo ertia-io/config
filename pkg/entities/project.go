@@ -1,20 +1,26 @@
 package entities
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/lucasepe/codename"
 	"github.com/segmentio/ksuid"
 )
 
-const DefaultProvider = "GLESYS"
-const ErrorNoReservableProjects = "Could not find any available projects to reserve"
-
-const ReserveGraceTime = time.Hour * 4
+const (
+	DefaultProvider           = "GLESYS"
+	DefaultDomain             = "ertia.cloud"
+	ErrorNoReservableProjects = "Could not find any available projects to reserve"
+	ReserveGraceTime          = time.Hour * 4
+)
 
 type Project struct {
 	ID            string         `json:"id"`
@@ -22,6 +28,7 @@ type Project struct {
 	ProviderID    string         `json:"providerID"` // Provider Project ID
 	ProviderToken string         `json:"providerToken"`
 	Name          string         `json:"name"`
+	Domain        string         `json:"domain"`
 	SSHKey        *SSHKey        `json:"sshKey"`
 	Nodes         []Node         `json:"nodes"`
 	Created       time.Time      `json:"created"`
@@ -30,7 +37,6 @@ type Project struct {
 	Deployments   []Deployment   `json:"deployments"`
 	Reserved      bool           `json:"reserved"`
 	Delete        *time.Time     `json:"delete"`
-	Domain        string         `json:"domain"`
 	Tags          []string       `json:"tags"`
 	Provisionings []Provisioning `json:"provisionings"`
 }
@@ -315,7 +321,22 @@ func NodeName() string {
 		return ""
 	}
 	return codename.Generate(rng, 4)
+}
 
+func SubDomain() string {
+	return fmt.Sprintf(".%s.%s", domainPrefix(6), DefaultDomain)
+}
+
+func domainPrefix(length int) string {
+	var buf [16]byte
+	var b64 string
+	for len(b64) < length {
+		rand.Read(buf[:])
+		b64 = base64.StdEncoding.EncodeToString(buf[:])
+		b64 = strings.NewReplacer("+", "", "/", "").Replace(b64)
+	}
+
+	return fmt.Sprintf("%s", strings.ToLower(b64[0:length]))
 }
 
 func (p *Project) AddNode() (*Project, *Node, error) {

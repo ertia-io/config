@@ -159,6 +159,16 @@ func (p *Project) FindMasterNode() *Node {
 	return nil
 }
 
+func (p *Project) FindNonMasterNode() *Node {
+	for mi := range p.Nodes {
+		if !p.Nodes[mi].IsMaster {
+			return &p.Nodes[mi]
+		}
+	}
+
+	return nil
+}
+
 func (p *Project) UpdateNode(node *Node) *Project {
 	node.Updated = time.Now()
 

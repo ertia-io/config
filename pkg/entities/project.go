@@ -28,7 +28,7 @@ type Project struct {
 	ProviderID    string         `json:"providerID"` // Provider Project ID
 	ProviderToken string         `json:"providerToken"`
 	Name          string         `json:"name"`
-	DNS           DNS            `json:"dns"`
+	DNS           *DNS           `json:"dns"`
 	SSHKey        *SSHKey        `json:"sshKey"`
 	Nodes         []Node         `json:"nodes"`
 	Created       time.Time      `json:"created"`
@@ -201,6 +201,11 @@ func (p *Project) RemoveKey(key *SSHKey) *Project {
 	return p
 }
 
+func (p *Project) UpdateDNS(dns *DNS) *Project {
+	p.DNS = dns
+	return p
+}
+
 func ParseConfig(jsonStr string) (*Project, error) {
 	config := &Project{}
 
@@ -272,7 +277,7 @@ func WithName(name string) ProjectOption {
 
 func WithDomain(domain string) ProjectOption {
 	return func(cfg *Project) *Project {
-		cfg.DNS = DNS{
+		cfg.DNS = &DNS{
 			Domain:  domain,
 			Status:  DNSStatusNew,
 			Created: time.Now(),

@@ -28,7 +28,7 @@ type Project struct {
 	ProviderID    string         `json:"providerID"` // Provider Project ID
 	ProviderToken string         `json:"providerToken"`
 	Name          string         `json:"name"`
-	Domain        string         `json:"domain"`
+	DNS           DNS            `json:"dns"`
 	SSHKey        *SSHKey        `json:"sshKey"`
 	Nodes         []Node         `json:"nodes"`
 	Created       time.Time      `json:"created"`
@@ -262,7 +262,12 @@ func WithName(name string) ProjectOption {
 
 func WithDomain(domain string) ProjectOption {
 	return func(cfg *Project) *Project {
-		cfg.Domain = domain
+		cfg.DNS = DNS{
+			Domain:  domain,
+			Status:  DNSStatusNew,
+			Created: time.Now(),
+			Updated: time.Now(),
+		}
 		return cfg
 	}
 }

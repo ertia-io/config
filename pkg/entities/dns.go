@@ -21,5 +21,9 @@ type DNS struct {
 }
 
 func (d *DNS) NeedsAdapting() bool {
-	return d.Status == DNSStatusNew
+	if d == nil {
+		return true
+	}
+
+	return d.Status == DNSStatusNew || d.Status == ""
 }

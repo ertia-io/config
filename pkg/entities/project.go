@@ -28,6 +28,7 @@ type Project struct {
 	ProviderID    string         `json:"providerID"` // Provider Project ID
 	ProviderToken string         `json:"providerToken"`
 	Name          string         `json:"name"`
+	K3SChannel    string         `json:"k3sChannel"`
 	DNS           *DNS           `json:"dns"`
 	SSHKey        *SSHKey        `json:"sshKey"`
 	Nodes         []Node         `json:"nodes"`
